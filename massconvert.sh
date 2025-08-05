@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # DBC Tools - Bulk Converter
-# Usage: bash convertfolder.sh [mode] [input_directory]
+# Usage: bash massconvert.sh [mode] [input_directory]
 # Modes:
 #   - 'export' (dbc to csv)
 #   - 'import' (csv to dbc)
 #   - On `import` you will want to use the name of the folder that you created for the exported CSV files.
 #    Example usage:
-#    bash convertfolder.sh export dbcs
-#    bash convertfolder.sh import dbcs_csv
+#    bash massconvert.sh export dbcs
+#    bash massconvert.sh import dbcs_csv
 
 if [ $# -ne 2 ]; then
     echo "Usage: $0 [export|import] [input_directory]"

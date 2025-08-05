@@ -37,17 +37,23 @@ def csv_to_dbc(csv_path, original_dbc, output_dbc):
         record = []
         for i, value in enumerate(row[:field_count]):
             try:
+                # First try as integer
                 int_val = int(value)
                 record.append(int_val)
             except ValueError:
-                if value == "":
-                    record.append(0)
-                else:
-                    if value not in string_offset_map:
-                        offset = len(string_block_data)
-                        string_offset_map[value] = offset
-                        string_block_data += value.encode('utf-8') + b'\x00'
-                    record.append(string_offset_map[value])
+                try:
+                    # Then try as float
+                    float_val = float(value)
+                    record.append(float_val)
+                except ValueError:
+                    if value == "":
+                        record.append(0)
+                    else:
+                        if value not in string_offset_map:
+                            offset = len(string_block_data)
+                            string_offset_map[value] = offset
+                            string_block_data += value.encode('utf-8') + b'\x00'
+                        record.append(string_offset_map[value])
         records.append(record)
 
 
@@ -56,7 +62,14 @@ def csv_to_dbc(csv_path, original_dbc, output_dbc):
         f.write(struct.pack('<4s4I', magic, len(records), field_count, record_size, new_string_block_size))
 
         for record in records:
-            f.write(struct.pack('<' + 'I' * field_count, *record))
+            # Pack each value appropriately based on its type
+            packed_values = []
+            for value in record:
+                if isinstance(value, float):
+                    packed_values.append(struct.pack('<f', value))
+                else:
+                    packed_values.append(struct.pack('<i', value))
+            f.write(b''.join(packed_values))
 
         f.write(string_block_data)
 
